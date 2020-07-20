@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
     This script will process MigrationWiz project failed and completed migrations.
 
 .DESCRIPTION
-    This script will process projects based on prefix, or all projects if you don't specify one, restart failed migrations and move completed users, if
+    This script will process projects based on prefix or all projects if you don't specify one, restart failed migrations and move completed users, if
     you specify a destination project.
     This is ideal for ongoing project management in large migrations.
 
