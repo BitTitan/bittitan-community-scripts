@@ -20,9 +20,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
     Last Version :  July 15th, 2020
 
 .SYNOPSIS
-    Get-DPModuleStatus.ps1 will provide a CSV output of the current DeploymentPro status for a single MSPC customer.
+    Get-DPModuleStatus.ps1 will provide a CSV output of the current DeploymentPro status for a single customer.
 .DESCRIPTION
-    This script will provide a CSV export containing the PrimaryEmailAddress, DestinationEmailAddress, ScheduledStartDate, Device Name, and DeploymentPro status for an entire MSPC customer. All objects found will be logged to a log file location, output in the console, and to the CSV. Each run of the script is logged independently.
+    This script will provide a CSV export containing the PrimaryEmailAddress, DestinationEmailAddress, ScheduledStartDate, Device Name, and DeploymentPro status for an entire customer. 
+    All objects found will be logged to a log file location, output in the console, and to the CSV. Each run of the script is logged independently.
+    Status is provided per machine per user.
 .OUTPUTS
     Creates a log file indicating current state of all user/device combinations found, the log file location is displayed during the script execution. A CSV file will be exported to the storage directory indicated at the end of the script execution. All successes and failures will be logged via error handling within the script.
 .EXAMPLE
