@@ -1,7 +1,4 @@
-<#
-
-.SYNOPSIS
-
+﻿<#
 Copyright 2020 BitTitan, Inc.
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. 
 
@@ -9,6 +6,12 @@ You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, 
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+#>
+
+<#
+
+.SYNOPSIS
+    Script to change source and destination migration line items.
 
 .DESCRIPTION
     This script will export the migration line items under the selected project or for all projects to a CSV file for you to review.  
@@ -475,16 +478,15 @@ Function Select-MSPC_Endpoint {
   	$endpointOffSet = 0
 	$endpoints = $null
 
-    $sourceMailboxEndpointList = @('ExchangeServer','ExchangeOnline2','ExchangeOnlineUsGovernment','Gmail','IMAP','GroupWise','zimbra','OX','WorkMail','Lotus','Office365Groups')
-    $destinationeMailboxEndpointList = @('ExchangeServer','ExchangeOnline2','ExchangeOnlineUsGovernment','Gmail','IMAP','OX','WorkMail','Office365Groups','Pst')
-    $sourceStorageEndpointList = @('OneDrivePro','OneDriveProAPI','SharePoint','SharePointOnlineAPI','GoogleDrive','AzureFileSystem','BoxStorage'.'DropBox','Office365Groups')
-    $destinationStorageEndpointList = @('OneDrivePro','OneDriveProAPI','SharePoint','SharePointOnlineAPI','GoogleDrive','BoxStorage'.'DropBox','Office365Groups')
-    $sourceArchiveEndpointList = @('ExchangeServer','ExchangeOnline2','ExchangeOnlineUsGovernment','GoogleVault','PstInternalStorage','Pst')
-    $destinationArchiveEndpointList =  @('ExchangeServer','ExchangeOnline2','ExchangeOnlineUsGovernment','Gmail','IMAP','OX','WorkMail','Office365Groups','Pst')
-    $sourcePublicFolderEndpointList = @('ExchangeServerPublicFolder','ExchangeOnlinePublicFolder','ExchangeOnlineUsGovernmentPublicFolder')
-    $destinationPublicFolderEndpointList = @('ExchangeServerPublicFolder','ExchangeOnlinePublicFolder','ExchangeOnlineUsGovernmentPublicFolder','ExchangeServer','ExchangeOnline2','ExchangeOnlineUsGovernment')
+    $sourceMailboxEndpointList = @(“ExchangeServer”,"ExchangeOnline2","ExchangeOnlineUsGovernment",“Gmail”,“IMAP”,“GroupWise”,“zimbra”,“OX”,"WorkMail","Lotus","Office365Groups")
+    $destinationeMailboxEndpointList = @(“ExchangeServer”,"ExchangeOnline2","ExchangeOnlineUsGovernment",“Gmail”,“IMAP”,“OX”,"WorkMail","Office365Groups","Pst")
+    $sourceStorageEndpointList = @(“OneDrivePro”,“OneDriveProAPI”,“SharePoint”,“SharePointOnlineAPI”,"GoogleDrive",“AzureFileSystem”,"BoxStorage"."DropBox","Office365Groups")
+    $destinationStorageEndpointList = @(“OneDrivePro”,“OneDriveProAPI”,“SharePoint”,“SharePointOnlineAPI”,"GoogleDrive","BoxStorage"."DropBox","Office365Groups")
+    $sourceArchiveEndpointList = @(“ExchangeServer”,"ExchangeOnline2","ExchangeOnlineUsGovernment","GoogleVault","PstInternalStorage","Pst")
+    $destinationArchiveEndpointList =  @(“ExchangeServer”,"ExchangeOnline2","ExchangeOnlineUsGovernment",“Gmail”,“IMAP”,“OX”,"WorkMail","Office365Groups","Pst")
+    $sourcePublicFolderEndpointList = @(“ExchangeServerPublicFolder”,“ExchangeOnlinePublicFolder”,"ExchangeOnlineUsGovernmentPublicFolder")
+    $destinationPublicFolderEndpointList = @(“ExchangeServerPublicFolder”,“ExchangeOnlinePublicFolder”,"ExchangeOnlineUsGovernmentPublicFolder",“ExchangeServer”,"ExchangeOnline2","ExchangeOnlineUsGovernment")
 
-    
     Write-Host
     if($endpointType -ne "") {
         Write-Host -Object  "INFO: Retrieving MSPC $exportOrImport $endpointType endpoints..."
@@ -721,8 +723,6 @@ Write-Host $msg
             $connector = $script:connectors[$i]
             if($connector.ProjectType -ne 'TeamWork' -and $connector.ProjectType -ne 'PublicFolder') {Write-Host -Object $i,"-",$connector.Name,"-",$connector.ProjectType}
         }
-        Write-Host -ForegroundColor Yellow  -Object "C - Select project names from CSV file"
-        Write-Host -ForegroundColor Yellow  -Object "A - Export 'Last Migration Status' for all projects"
         Write-Host -Object "x - Exit"
         Write-Host
 
@@ -733,67 +733,6 @@ Write-Host $msg
             $result = Read-Host -Prompt ("Select 0-" + ($script:connectors.Length-1) + " o x")
             if($result -eq "x") {
                 Exit
-            }
-            if($result -eq "C") {
-                $script:ProjectsFromCSV = $true
-                $script:allConnectors = $false
-
-                $script:selectedConnectors = @()
-
-                Write-Host -ForegroundColor yellow "ACTION: Select the CSV file to import project names."
-
-                $workingDir = "C:\scripts"
-                $result = Get-FileName $workingDir
-
-                #Read CSV file
-                try {
-                    $projectsInCSV = @((import-CSV $script:inputFile | Select ProjectName -unique).ProjectName)                    
-                    if(!$projectsInCSV) {$projectsInCSV = @(get-content $script:inputFile | where {$_ -ne "ProjectName"})}
-                    Write-Host -ForegroundColor Green "SUCCESS: $($projectsInCSV.Length) projects imported." 
-
-                    :AllConnectorsLoop
-                    foreach($connector in $script:connectors) {  
-
-                        $notFound = $false
-
-                        foreach ($projectInCSV in $projectsInCSV) {
-                            if($projectInCSV -eq $connector.Name) {
-                                $notFound = $false
-                                Break
-                            } 
-                            else {                               
-                                $notFound = $true
-                            } 
-                        }
-
-                        if($notFound) {
-                            Continue AllConnectorsLoop
-                        }  
-                        
-                        $script:selectedConnectors += $connector
-                                           
-                    }	
-
-                    Return "$workingDir\ChangeExport-$script:customerName-ProjectsFromCSV-$(Get-Date -Format "yyyyMMdd").csv"
-                }
-                catch {
-                    $msg = "ERROR: Failed to import the CSV file '$script:inputFile'. All projects will be processed."
-                    Write-Host -ForegroundColor Red  $msg
-                    Log-Write -Message $msg 
-                    Log-Write -Message $_.Exception.Message
-
-                    $script:allConnectors = $True
-
-                    Return "$workingDir\ChangeExport-$script:customerName-AllProjects-$(Get-Date -Format "yyyyMMdd").csv"
-                }                           
-                
-                Break
-            }
-            if($result -eq "A") {
-                $script:ProjectsFromCSV = $false
-                $script:allConnectors = $true
-
-                Return "$workingDir\ChangeExport-$script:customerName-AllProjects-$(Get-Date -Format "yyyyMMdd").csv"
             }
             if(($result -match "^\d+$") -and ([int]$result -ge 0) -and ([int]$result -lt $script:connectors.Length)) {
                 $script:ProjectsFromCSV = $false
@@ -895,14 +834,14 @@ Function Display-MW_ConnectorData {
         }
 
         try {
-            $mailboxesArray | Export-Csv -Path $workingDir\MailboxData.csv -NoTypeInformation -force
+            $mailboxesArray | Export-Csv -Path "$workingDir\ChangeExport-$script:customerName-$($script:connector.Name)-$(Get-Date -Format "yyyyMMdd").csv" -NoTypeInformation -force
 
-            $msg = "SUCCESS: CSV file '$workingDir\MailboxData.csv' processed, exported and open."
+            $msg = "SUCCESS: CSV file '$workingDir\ChangeExport-$script:customerName-$($script:connector.Name)-$(Get-Date -Format "yyyyMMdd").csv' processed, exported and open."
             Write-Host -ForegroundColor Green $msg
             Log-Write -Message $msg
         }
         catch {
-            $msg = "ERROR: Failed to export mailboxes to '$workingDir\MailboxData.csv' CSV file. Script aborted."
+            $msg = "ERROR: Failed to export mailboxes to '$workingDir\ChangeExport-$script:customerName-$($script:connector.Name)-$(Get-Date -Format "yyyyMMdd").csv' CSV file. Script aborted."
             Write-Host -ForegroundColor Red  $msg
             Log-Write -Message $msg
             Write-Host -ForegroundColor Red $_.Exception.Message
@@ -912,10 +851,10 @@ Function Display-MW_ConnectorData {
 
         try {
             #Open the CSV file for editing
-            Start-Process -FilePath $workingDir\MailboxData.csv
+            Start-Process -FilePath "$workingDir\ChangeExport-$script:customerName-$($script:connector.Name)-$(Get-Date -Format "yyyyMMdd").csv"
         }
         catch {
-            $msg = "ERROR: Failed to open '$workingDir\MailboxData.csv' CSV file. Script aborted."
+            $msg = "ERROR: Failed to open '$workingDir\ChangeExport-$script:customerName-$($script:connector.Name)-$(Get-Date -Format "yyyyMMdd").csv' CSV file. Script aborted."
             Write-Host -ForegroundColor Red  $msg
             Log-Write -Message $msg
             Write-Host -ForegroundColor Red $_.Exception.Message
@@ -932,7 +871,7 @@ Function Change-MW_ExportImportAddresses {
 
 	if (Test-Path $workingDir) {
 
-        $migrations = @(Import-Csv -Path $workingDir\MailboxData.csv) 
+        $migrations = @(Import-Csv -Path "$workingDir\ChangeExport-$script:customerName-$($script:connector.Name)-$(Get-Date -Format "yyyyMMdd").csv") 
         $msg = "SUCCESS: CSV file '$csvFileName' imported."
         Write-Host -ForegroundColor Green $msg
         Log-Write -Message $msg
@@ -1162,7 +1101,7 @@ Function Change-MW_ExportImportAddresses {
 
 	}
 	else {
-		Write-Host -ForegroundColor Red "ERROR: The CSV file '$workingDir\MailboxData.csv' was not found." 
+		Write-Host -ForegroundColor Red "ERROR: The CSV file '$workingDir\ChangeExport-$script:customerName-$($script:connector.Name)-$(Get-Date -Format "yyyyMMdd").csv' was not found." 
 	}
 }
 
