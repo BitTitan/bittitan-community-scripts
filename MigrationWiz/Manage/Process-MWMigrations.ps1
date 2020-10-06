@@ -41,7 +41,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 
 .PARAMETER BitTitanWorkgroupID
     Set this to skip the workgroup selection menu. Use the UI to get your WorkgroupId, from the website URL.
-    Example: To set the workgroupid enter '-BitTitanWorkgroupId [ID]'
+    Example: To set the workgroupid enter '-BitTitanWorkgroupId [ID]' 
 
 .PARAMETER BitTitanCustomerID
     Set this to skip the customer selection menu. Use the UI to get your CustomerId, from the website URL.
