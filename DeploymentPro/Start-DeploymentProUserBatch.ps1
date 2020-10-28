@@ -21,7 +21,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 .NOTES
 	Company:		BitTitan, Inc.
 	Title:			Start-DeploymentProUserBatch.ps1
-	Author:			Curtis Jones (cjones@bittitan.com)
 	
     Requirements:   BitTitan Powershell SDK
 
