@@ -195,19 +195,28 @@ Function Get-Directory($initialDirectory) {
 Function Connect-BitTitan {
     #[CmdletBinding()]
 
-    #Install Packages/Modules for Windows Credential Manager if required
-    If(!(Get-PackageProvider -Name 'NuGet')){
-        Install-PackageProvider -Name NuGet -Force
-    }
-    If(!(Get-Module -ListAvailable -Name 'CredentialManager')){
-        Install-Module CredentialManager -Force
-    } 
-    else { 
-        Import-Module CredentialManager
-    }
+    if((Get-Module PackageManagement)) { 
+        #Install Packages/Modules for Windows Credential Manager if required
+        If(!(Get-PackageProvider -Name 'NuGet')){
+            Install-PackageProvider -Name NuGet -Force
+        }
+        If((Get-Module PowerShellGet) -and !(Get-Module -ListAvailable -Name 'CredentialManager')){
+            Install-Module CredentialManager -Force
+            $useCredentialManager = $true
+        } 
+        else { 
+            Import-Module CredentialManager
+            $useCredentialManager = $true
+        }
 
-    # Authenticate
-    $script:creds = Get-StoredCredential -Target 'https://migrationwiz.bittitan.com'
+        if($useCredentialManager ) {
+            # Authenticate
+            $script:creds = Get-StoredCredential -Target 'https://migrationwiz.bittitan.com'
+        }
+    }
+    else{
+        $useCredentialManager = $false
+    }
     
     if(!$script:creds){
         $credentials = (Get-Credential -Message "Enter BitTitan credentials")
@@ -217,17 +226,23 @@ Function Connect-BitTitan {
             Log-Write -Message $msg
             Exit
         }
-        New-StoredCredential -Target 'https://migrationwiz.bittitan.com' -Persist 'LocalMachine' -Credentials $credentials | Out-Null
-        
-        $msg = "SUCCESS: BitTitan credentials for target 'https://migrationwiz.bittitan.com' stored in Windows Credential Manager."
-        Write-Host -ForegroundColor Green  $msg
-        Log-Write -Message $msg
 
-        $script:creds = Get-StoredCredential -Target 'https://migrationwiz.bittitan.com'
+        if($useCredentialManager) {
+            New-StoredCredential -Target 'https://migrationwiz.bittitan.com' -Persist 'LocalMachine' -Credentials $credentials | Out-Null
+            
+            $msg = "SUCCESS: BitTitan credentials for target 'https://migrationwiz.bittitan.com' stored in Windows Credential Manager."
+            Write-Host -ForegroundColor Green  $msg
+            Log-Write -Message $msg
 
-        $msg = "SUCCESS: BitTitan credentials for target 'https://migrationwiz.bittitan.com' retrieved from Windows Credential Manager."
-        Write-Host -ForegroundColor Green  $msg
-        Log-Write -Message $msg
+            $script:creds = Get-StoredCredential -Target 'https://migrationwiz.bittitan.com'
+
+            $msg = "SUCCESS: BitTitan credentials for target 'https://migrationwiz.bittitan.com' retrieved from Windows Credential Manager."
+            Write-Host -ForegroundColor Green  $msg
+            Log-Write -Message $msg
+        }
+        else {
+            $script:creds = $credentials
+        }
     }
     else{
         $msg = "SUCCESS: BitTitan credentials for target 'https://migrationwiz.bittitan.com' retrieved from Windows Credential Manager."
