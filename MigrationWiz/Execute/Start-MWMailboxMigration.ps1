@@ -1,4 +1,4 @@
-﻿<#
+<#
 Copyright 2020 BitTitan, Inc..
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. 
 
@@ -49,23 +49,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 
 .PARAMETER WorkrgroupID
     Workgroup ID, if managing projects that belong to other Workgroups than your personal one
-
-.INPUTS
-    CSV containing Mailbox projects' names with a single column header named ProjectName 
-
-.EXAMPLE
-    .\Start-MWMAilboxMigration.ps1 -csvFilename connectors.csv -csvfilepath c:\temp -full $true
-    Runs the script to start a full mailbox migration on the projects contained in a CSV file
-
-    .\Start-MWMAilboxMigration.ps1 -csvFilename connectors.csv -csvfilepath c:\temp -prestage $true -days 30
-    Runs the script to start a pre-stage mailbox migration, with a 30 day time threshold, on the projects contained in a CSV file
-
-    .\Start-MWMAilboxMigration.ps1 -csvFilename connectors.csv -csvfilepath c:\temp -retry $true
-    Runs the script to start a retry mailbox migration on the projects contained in a CSV file
-
-    .\Start-MWMAilboxMigration.ps1 -csvFilename connectors.csv -csvfilepath c:\temp -full $true -workgroupid 4bb378c2-d754-4ddf-be00-f6323c3edd45
-    Runs the script to start a full mailbox migration on the  projects contained in a CSV file and on the workgroup with ID 4bb378c2-d754-4ddf-be00-f6323c3edd45
-
 #>
 
 [CmdletBinding(ConfirmImpact="None",
