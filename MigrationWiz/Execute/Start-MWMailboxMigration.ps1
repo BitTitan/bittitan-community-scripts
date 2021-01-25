@@ -25,6 +25,31 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
     This script will authenticate, retrieve the existing connectors and start a migration.
     This script is loosely based on https://github.com/BitTitan/bittitan-sdk/blob/master/PowerShell/AutomationExamples/MigrationWiz/SubmitPreStageMigration.ps1
 
+.PARAMETER BitTitanWorkgroupID
+    Set this to skip the workgroup selection menu. Use the UI to get your WorkgroupId, from the website URL.
+    Example: To set the workgroupid enter '-BitTitanWorkgroupId [ID]'
+
+.PARAMETER CsvFilePath
+    Full Path to your CSV file containing the mailbox projects' names.
+
+.PARAMETER CsvFilename
+    Filename of your CSV file containing the mailbox projects' names.
+
+.PARAMETER PreStage
+    Pre-Stage migration
+
+.PARAMETER days
+    Days threshold for Pre-Stage migrations
+
+.PARAMETER Full
+    Full migration
+
+.PARAMETER Retry
+    Retry failed migrations
+
+.PARAMETER WorkrgroupID
+    Workgroup ID, if managing projects that belong to other Workgroups than your personal one
+
 .INPUTS
     CSV containing Mailbox projects' names with a single column header named ProjectName 
 
@@ -38,6 +63,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
     .\Start-MWMAilboxMigration.ps1 -csvFilename connectors.csv -csvfilepath c:\temp -retry $true
     Runs the script to start a retry mailbox migration on the projects contained in a CSV file
 
+    .\Start-MWMAilboxMigration.ps1 -csvFilename connectors.csv -csvfilepath c:\temp -full $true -workgroupid 4bb378c2-d754-4ddf-be00-f6323c3edd45
+    Runs the script to start a full mailbox migration on the  projects contained in a CSV file and on the workgroup with ID 4bb378c2-d754-4ddf-be00-f6323c3edd45
+
 #>
 
 [CmdletBinding(ConfirmImpact="None",
@@ -48,12 +76,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
     PositionalBinding=$false)]
 Param
 (
-     [Parameter(Mandatory = $true)] [String]$CsvFilePath # Full Path to your CSV file containing the mailbox projects' names.
-    ,[Parameter(Mandatory = $true)] [String]$CsvFilename # Filename of your CSV file containing the the mailbox projects' names.
-    ,[Parameter(Mandatory = $true,ParameterSetName='Pre-Stage')] [bool]$prestage #Pre-Stage migration
-    ,[Parameter(Mandatory = $true,ParameterSetName='Pre-Stage')] [String]$days #Number of days for Pre-Stage migrations
-    ,[Parameter(Mandatory = $true,ParameterSetName='Full')] [bool]$Full #Full migration
-    ,[Parameter(Mandatory = $true,ParameterSetName='Retry')] [bool]$Retry #Retry migration
+     [Parameter(Mandatory = $true)] [String]$CsvFilePath
+    ,[Parameter(Mandatory = $true)] [String]$CsvFilename
+    ,[Parameter(Mandatory = $true,ParameterSetName='Pre-Stage')] [bool]$prestage
+    ,[Parameter(Mandatory = $true,ParameterSetName='Pre-Stage')] [String]$days
+    ,[Parameter(Mandatory = $true,ParameterSetName='Full')] [bool]$Full
+    ,[Parameter(Mandatory = $true,ParameterSetName='Retry')] [bool]$Retry
+    ,[Parameter(Mandatory = $false)] [guid]$WorkgroupID
 )
 
 $error.clear()
@@ -168,7 +197,14 @@ Import-MigrationWizModule
 
 #region Authenticate
 try{
-    $mwTicket = Get-MW_Ticket -Credentials $creds -ErrorAction Stop
+    if ($WorkgroupID)
+    {
+        $mwTicket = Get-MW_Ticket -Credentials $creds -ErrorAction Stop -WorkgroupId $WorkgroupID -IncludeSharedProjects
+    }
+    else
+    {
+        $mwTicket = Get-MW_Ticket -Credentials $creds -ErrorAction Stop    
+    }
 }
 Catch{
     Write-Error "Could not create BitTitan tickets. Terminating script."
@@ -176,10 +212,6 @@ Catch{
     Exit
 }
 #endregion Authenticate
-
-#region Get-MWMailboxMigrationStatus
-
-#endregion Get-MWMailboxMigrationStatus
 
 #region Start-Migration
 function Start-Migration
