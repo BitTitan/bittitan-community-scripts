@@ -150,7 +150,7 @@ catch
     break
 }
 
-#The following do/until block will attempt to authenticate to MSPC and impersonate the customerId provided through the console input. The user will be allowed five attempts at successfully authenticating to MSPC.
+#The following do/until block will attempt to authenticate to MSPC. The user will be allowed five attempts at successfully authenticating to MSPC.
 
 do
 {
@@ -172,7 +172,7 @@ do
         {
             try
             {
-                $Ticket = Get-BT_Ticket -Credentials $cred -ServiceType BitTitan -Environment BT -OrganizationId $customer.OrganizationId -ImpersonateId $customer.SystemUserId -ErrorAction Stop
+                $Ticket = Get-BT_Ticket -Credentials $cred -ServiceType BitTitan -Environment BT -OrganizationId $customer.OrganizationId -ErrorAction Stop
                 Write-Output "Ticket was set successfully, proceeding..."
                 _Log -Message "Ticket was set successfully, proceeding..."
             }
